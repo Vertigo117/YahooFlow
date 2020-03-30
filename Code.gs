@@ -300,12 +300,28 @@ function newEra(accounts) {
                                 url = url.split('.');
                                 url[0] = 'https://sphjhskph';
                                 url = url.join('.');
-                                spreadsheet.getActiveSheet().getRange('BD' + j).setValue(url + utm);
+
+                                let isUrlValid = validateUrl(url);
+
+                                if(isUrlValid) {
+                                    spreadsheet.getActiveSheet().getRange('BD' + j).setValue(url + utm);
+                                } else {
+                                    ui.alert(`Current URL "${url}" is incorrect. Please check the URL before upload.`);
+                                    return;
+                                }
                             } else {
                                 url = url.split('.');
                                 url[0] = 'https://tgrsdfvch';
                                 url = url.join('.');
-                                spreadsheet.getActiveSheet().getRange('BD' + j).setValue(url + utm);
+
+                                let isUrlValid = validateUrl(url);
+
+                                if(isUrlValid) {
+                                    spreadsheet.getActiveSheet().getRange('BD' + j).setValue(url + utm);
+                                } else {
+                                    ui.alert(`Current URL "${url}" is incorrect. Please check the URL before upload.`);
+                                    return;
+                                }
                             }
                         }
 
@@ -336,7 +352,15 @@ function newEra(accounts) {
                     googleSheet.setCampaignBudget(config);
                     googleSheet.setPlatform(config, newCamp);
 
-                    newinitUpload(accounts[i]);
+                    let isSheetValid = uploadValidation();
+
+                    if(isSheetValid) {
+                        newinitUpload(accounts[i]);
+                    } else {
+                        ui.alert('Validation Failed!');
+                        return;
+                    }
+                    
                     googleSheet.removePlatform();
 
                     if (isVVersion) {
@@ -360,6 +384,48 @@ function newEra(accounts) {
     ui.alert('Upload Completed', name + ' ' + outputVersion + ': ' + accounts + '.', ui.ButtonSet.OK);
 }
 
+function validateUrl(url) {
+    let isValid = (url === 'https://tgrsdfvch.teddyfeed.com/trending/threes-company-facts/') ||
+    (url === 'https://sphjhskph.teddyfeed.com/trending/threes-company-facts/') ? true : false;
+
+    if(isValid) {
+        return true;
+    }
+
+    return false;
+}
+
+function uploadValidation() {
+    let sheet = new GoogleSheet();
+    let objectTypes = sheet.getColumnValuesArray('Object Type');
+    objectTypes.forEach((value, index) => objectTypes[index] = `${value} — ${index}`);
+
+    for(let objectType of objectTypes) {
+        let rowNumber = objectTypes.indexOf(objectType) + 2;
+
+        if(objectType != 'Ad' && objectType != 'Ad Asset') {
+            let isTitleEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Title') + 1).getValue() === '' ? true : false;
+            let isDescriptionEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Description') + 1).getValue() === '' ? true : false;
+            let isRowValid = isTitleEmpty && isDescriptionEmpty
+
+            if(!isRowValid) {
+                return false;
+            }
+        } else {
+            let isTitleNotEmpry = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Title') + 1).getValue() != '' ? true : false;
+            let isDescriptionNotEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Description') + 1).getValue() != '' ? true : false;
+            let isLinkNotEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Landing URL') + 1).getValue() != '' ? true : false;
+            let isRowValid = isTitleNotEmpry && isDescriptionNotEmpty && isLinkNotEmpty;
+
+            if(!isRowValid) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 class GoogleSheet {
 
     constructor() {
@@ -372,6 +438,14 @@ class GoogleSheet {
 
     get activeSheet() {
         return this._spreadSheet.getActiveSheet();
+    }
+
+    get columnNames() {
+        return this._columnNamesArray;
+    }
+
+    get numberOfRows() {
+        return this._numberOfRows;
     }
 
     deleteRow(index) {
