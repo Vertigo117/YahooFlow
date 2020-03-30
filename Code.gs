@@ -352,12 +352,28 @@ function newEra(accounts) {
                     googleSheet.setCampaignBudget(config);
                     googleSheet.setPlatform(config, newCamp);
 
-                    let isSheetValid = uploadValidation();
+                    let isTitleValid = validateTitle();
+                    let isDescriptionValid = validateDescription();
+                    let isLinkValid = validateLink();
 
-                    if(isSheetValid) {
+                    if(isTitleValid && isDescriptionValid && isLinkValid) {
                         newinitUpload(accounts[i]);
                     } else {
-                        ui.alert('Validation Failed!');
+                        let reason = 'Validation Error!';
+
+                        if(!isTitleValid) {
+                            reason += ' Check Title Column.'
+                        }
+
+                        if(!isDescriptionValid) {
+                            reason += ' Check Description Column.';
+                        }
+
+                        if(!isLinkValid) {
+                            reason += ' Check Loading URL.'
+                        }
+
+                        ui.alert(reason);
                         return;
                     }
                     
@@ -395,7 +411,7 @@ function validateUrl(url) {
     return false;
 }
 
-function uploadValidation() {
+function validateDescription() {
     let sheet = new GoogleSheet();
     let objectTypes = sheet.getColumnValuesArray('Object Type');
     objectTypes.forEach((value, index) => objectTypes[index] = `${value} — ${index}`);
@@ -403,21 +419,62 @@ function uploadValidation() {
     for(let objectType of objectTypes) {
         let rowNumber = objectTypes.indexOf(objectType) + 2;
 
-        if(objectType != 'Ad' && objectType != 'Ad Asset') {
-            let isTitleEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Title') + 1).getValue() === '' ? true : false;
+        if(objectType.indexOf('Ad —') === -1 && objectType.indexOf('Ad Asset') === -1) {
             let isDescriptionEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Description') + 1).getValue() === '' ? true : false;
-            let isRowValid = isTitleEmpty && isDescriptionEmpty
 
-            if(!isRowValid) {
+            if(!isDescriptionEmpty) {
                 return false;
             }
-        } else {
-            let isTitleNotEmpry = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Title') + 1).getValue() != '' ? true : false;
+        } else if(objectType.indexOf('Ad —') > -1 || objectType.indexOf('Ad Asset') > -1) {
             let isDescriptionNotEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Description') + 1).getValue() != '' ? true : false;
-            let isLinkNotEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Landing URL') + 1).getValue() != '' ? true : false;
-            let isRowValid = isTitleNotEmpry && isDescriptionNotEmpty && isLinkNotEmpty;
 
-            if(!isRowValid) {
+            if(!isDescriptionNotEmpty) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+function validateTitle() {
+    let sheet = new GoogleSheet();
+    let objectTypes = sheet.getColumnValuesArray('Object Type');
+    objectTypes.forEach((value, index) => objectTypes[index] = `${value} — ${index}`);
+
+    for(let objectType of objectTypes) {
+        let rowNumber = objectTypes.indexOf(objectType) + 2;
+
+        if(objectType.indexOf('Ad —') === -1 && objectType.indexOf('Ad Asset') === -1) {
+            let isTitleEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Title') + 1).getValue() === '' ? true : false;
+
+            if(!isTitleEmpty) {
+                return false;
+            }
+        } else if(objectType.indexOf('Ad —') > -1 || objectType.indexOf('Ad Asset') > -1) {
+            let isTitleNotEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Title') + 1).getValue() != '' ? true : false;
+
+            if(!isTitleNotEmpty) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+function validateLink() {
+    let sheet = new GoogleSheet();
+    let objectTypes = sheet.getColumnValuesArray('Object Type');
+    objectTypes.forEach((value, index) => objectTypes[index] = `${value} — ${index}`);
+
+    for(let objectType of objectTypes) {
+        let rowNumber = objectTypes.indexOf(objectType) + 2;
+
+        if(objectType.indexOf('Ad —') > -1 || objectType.indexOf('Ad Asset') > -1) {
+            let isLinkNotEmpty = sheet.activeSheet.getRange(rowNumber, sheet.columnNames.indexOf('Landing URL') + 1).getValue() != '' ? true : false;
+
+            if(!isLinkNotEmpty) {
                 return false;
             }
         }
