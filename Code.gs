@@ -419,7 +419,7 @@ class GoogleSheet {
             let currentColumnName = this.getColumnName(columnIndex);
 
             if(columnName === currentColumnName) {
-                let columnValuesTwoDimensionalArray = this.activeSheet.getRange(2, columnIndex, this._numberOfRows).getValues();
+                let columnValuesTwoDimensionalArray = this.activeSheet.getRange(2, columnIndex, this._numberOfRows - 1).getValues();
                 columnValuesTwoDimensionalArray.forEach(value => columnValuesArray.push(value[0]));
 
                 return columnValuesArray;
