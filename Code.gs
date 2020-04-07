@@ -401,14 +401,10 @@ function newEra(accounts) {
 }
 
 function validateUrl(url) {
-    let isValid = (url === 'https://tgrsdfvch.teddyfeed.com/trending/threes-company-facts/') ||
-    (url === 'https://sphjhskph.teddyfeed.com/trending/threes-company-facts/') ? true : false;
+    var regEx = /^(http(s)?:\/\/)+([\w\-\w])+(.)+(teddyfeed\.com)+(\/)+([\w\-\w])+(\/)+([\w\-\w])+(\/)+$/;
+    let isValid =  regEx.test(url);
 
-    if(isValid) {
-        return true;
-    }
-
-    return false;
+    return isValid;
 }
 
 function validateDescription() {
